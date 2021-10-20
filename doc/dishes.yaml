@@ -1,0 +1,60 @@
+components:
+  schemas:
+    Dish:
+      type: object
+      required:
+        - name
+        - description
+        - price
+      properties:
+        name:
+          type: string
+          description: The dish name
+          example: Domino Pizza
+        description:
+          type: string
+          description: The description of the dish
+          example: Baked flour with a sauce, extra cheese, and saussage
+        image:
+          type: string
+          description: The dish image
+          example: images/dominopizza.png
+        category:
+          type: string
+          description: Category of the dish
+          example: Meal
+        label:
+          type: string
+          description: Label of the dish
+          example: Hot
+        price:
+          type: number
+          description: Price of the dish
+          example: 499
+        featured:
+          type: boolean
+          description: featured or not
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          description: Date when the dish created
+          example: 2021-10-18T02:46:06.953Z
+        updatedAt:
+          type: string
+          format: date-time
+          description: Date when the dish updated
+          example: 2021-10-18T02:46:06.953Z
+paths:
+  /dishes:
+    get:
+      summary: Dishes
+      responses:
+        200:
+          description: The list of the dishes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Dish"
