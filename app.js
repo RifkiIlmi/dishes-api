@@ -36,34 +36,44 @@ app.use("/api-docs", SwaggerUi.serve, SwaggerUi.setup(specs));
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cookieParser("mril12secr3t"));
 app.use(express.static(path.join(__dirname, "public")));
 
 function auth(req, res, next) {
-  const authHeader = req.headers.authorization;
+  if (!req.signedCookies.user) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      const err = new Error("No Authorization in header");
 
-  if (!authHeader) {
-    const err = new Error("No Authorization in header");
+      res.setHeader("WWW-Authenticate", "Basic");
+      err.status = 401;
+      next(err);
+      return;
+    }
 
-    res.setHeader("WWW-Authenticate", "Basic");
-    err.status = 401;
-    next(err);
-    return;
-  }
+    const auth = Buffer.from(authHeader.split(" ")[1], "base64")
+      .toString()
+      .split(":");
 
-  const auth = Buffer.from(authHeader.split(" ")[1], "base64")
-    .toString()
-    .split(":");
+    if (auth[0] === "admin" && auth[1] === "rifki") {
+      res.cookie("user", "admin", { signed: true });
+      next();
+    } else {
+      const err = new Error("You are not authenticate");
 
-  if (auth[0] === "admin" && auth[1] === "rifki") {
-    next();
+      res.setHeader("WWW-Authenticate", "Basic");
+      err.status = 401;
+      next(err);
+    }
   } else {
-    const err = new Error("You are not authenticate");
+    if (req.signedCookies.user === "admin") {
+      next();
+    } else {
+      const err = new Error("You are not authenticate");
 
-    res.setHeader("WWW-Authenticate", "Basic");
-    err.status = 401;
-    next(err);
-    return;
+      err.status = 401;
+      next(err);
+    }
   }
 }
 
