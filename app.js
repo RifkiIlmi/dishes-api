@@ -1,12 +1,13 @@
-var createError = require("http-errors");
-var express = require("express");
-var path = require("path");
-var cookieParser = require("cookie-parser");
-var logger = require("morgan");
+const createError = require("http-errors");
+const express = require("express");
+const path = require("path");
+const session = require("express-session");
+const FileStore = require("session-file-store")(session);
+const logger = require("morgan");
 const SwaggerUi = require("swagger-ui-express");
 
 const specs = require("./swaggerOptions");
-var mongoose = require("mongoose");
+const mongoose = require("mongoose");
 
 const url = "mongodb://localhost:27017/conFusion";
 mongoose.connect(url);
@@ -18,13 +19,13 @@ db.once("open", function () {
   console.log("Connected successfully");
 });
 
-var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
-var dishesRouter = require("./routes/dishesRouter");
-var promotionsRouter = require("./routes/promotionsRouter");
-var leadersRouter = require("./routes/leadersRouter");
+const indexRouter = require("./routes/index");
+const usersRouter = require("./routes/users");
+const dishesRouter = require("./routes/dishesRouter");
+const promotionsRouter = require("./routes/promotionsRouter");
+const leadersRouter = require("./routes/leadersRouter");
 
-var app = express();
+const app = express();
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -36,11 +37,19 @@ app.use("/api-docs", SwaggerUi.serve, SwaggerUi.setup(specs));
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser("mril12secr3t"));
 app.use(express.static(path.join(__dirname, "public")));
+app.use(
+  session({
+    name: "session_id",
+    secret: "mril12secr3t",
+    saveUninitialized: false,
+    resave: false,
+    store: FileStore(),
+  })
+);
 
 function auth(req, res, next) {
-  if (!req.signedCookies.user) {
+  if (!req.session.user) {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
       const err = new Error("No Authorization in header");
@@ -56,7 +65,7 @@ function auth(req, res, next) {
       .split(":");
 
     if (auth[0] === "admin" && auth[1] === "rifki") {
-      res.cookie("user", "admin", { signed: true });
+      req.session.user = "admin";
       next();
     } else {
       const err = new Error("You are not authenticate");
@@ -66,7 +75,8 @@ function auth(req, res, next) {
       next(err);
     }
   } else {
-    if (req.signedCookies.user === "admin") {
+    if (req.session.user === "admin") {
+      console.log("req.session: ", req.session);
       next();
     } else {
       const err = new Error("You are not authenticate");
