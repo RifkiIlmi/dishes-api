@@ -20,7 +20,7 @@ db.once("open", function () {
 });
 
 const indexRouter = require("./routes/index");
-const usersRouter = require("./routes/users");
+const usersRouter = require("./routes/usersRouter");
 const dishesRouter = require("./routes/dishesRouter");
 const promotionsRouter = require("./routes/promotionsRouter");
 const leadersRouter = require("./routes/leadersRouter");
@@ -48,39 +48,19 @@ app.use(
   })
 );
 
+app.use("/", indexRouter);
+app.use("/users", usersRouter);
+
 function auth(req, res, next) {
   if (!req.session.user) {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) {
-      const err = new Error("No Authorization in header");
-
-      res.setHeader("WWW-Authenticate", "Basic");
-      err.status = 401;
-      next(err);
-      return;
-    }
-
-    const auth = Buffer.from(authHeader.split(" ")[1], "base64")
-      .toString()
-      .split(":");
-
-    if (auth[0] === "admin" && auth[1] === "rifki") {
-      req.session.user = "admin";
-      next();
-    } else {
-      const err = new Error("You are not authenticate");
-
-      res.setHeader("WWW-Authenticate", "Basic");
-      err.status = 401;
-      next(err);
-    }
+    const err = new Error("You are not authenticate");
+    err.status = 401;
+    next(err);
   } else {
-    if (req.session.user === "admin") {
-      console.log("req.session: ", req.session);
+    if (req.session.user === "authenticated") {
       next();
     } else {
       const err = new Error("You are not authenticate");
-
       err.status = 401;
       next(err);
     }
@@ -89,8 +69,6 @@ function auth(req, res, next) {
 
 app.use(auth);
 
-app.use("/", indexRouter);
-app.use("/users", usersRouter);
 app.use("/dishes", dishesRouter);
 app.use("/promotions", promotionsRouter);
 app.use("/leaders", leadersRouter);
