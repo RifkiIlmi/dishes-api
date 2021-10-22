@@ -6,6 +6,9 @@ const FileStore = require("session-file-store")(session);
 const logger = require("morgan");
 const SwaggerUi = require("swagger-ui-express");
 
+var passport = require("passport");
+var authenticate = require("./authenticate");
+
 const specs = require("./swaggerOptions");
 const mongoose = require("mongoose");
 
@@ -51,19 +54,18 @@ app.use(
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 
+app.use(passport.initialize());
+app.use(passport.session());
+
 function auth(req, res, next) {
-  if (!req.session.user) {
+  console.log(req.user);
+
+  if (!req.user) {
     const err = new Error("You are not authenticate");
     err.status = 401;
     next(err);
   } else {
-    if (req.session.user === "authenticated") {
-      next();
-    } else {
-      const err = new Error("You are not authenticate");
-      err.status = 401;
-      next(err);
-    }
+    next();
   }
 }
 
