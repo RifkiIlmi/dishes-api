@@ -1,20 +1,20 @@
-const { Router } = require("express");
-const bodyParser = require("body-parser");
+const { Router } = require('express');
+const bodyParser = require('body-parser');
+const authenticate = require('../authentication');
 
-const Leaders = require("../models/leaders");
+const Leaders = require('../models/leaders');
 const leadersRouter = Router();
 
 leadersRouter.use(bodyParser.json());
 
 leadersRouter
-  .route("/")
-
+  .route('/')
   .get((req, res, next) => {
     Leaders.find({})
       .then(
         (data) => {
           res.statusCode = 200;
-          res.setHeader("Content-Type", "application/json");
+          res.setHeader('Content-Type', 'application/json');
           res.json({ data });
         },
         (err) => next(err)
@@ -23,32 +23,29 @@ leadersRouter
         next(err);
       });
   })
-
-  .post((req, res, next) => {
+  .post(authenticate.verifyUser, (req, res, next) => {
     const leader = new Leaders(req.body);
 
     leader
       .save()
       .then((data) => {
         res.statusCode = 200;
-        res.setHeader("Content-Type", "application/json");
+        res.setHeader('Content-Type', 'application/json');
         res.json({ data });
       })
       .catch((err) => {
         next(err);
       });
   })
-
-  .put((req, res, next) => {
+  .put(authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
-    res.end("PUT operation not supported on /leaders");
+    res.end('PUT operation not supported on /leaders');
   })
-
-  .delete((req, res, next) => {
+  .delete(authenticate.verifyUser, (req, res, next) => {
     Leaders.deleteMany({})
       .then((data) => {
         res.statusCode = 200;
-        res.setHeader("Content-Type", "application/json");
+        res.setHeader('Content-Type', 'application/json');
         res.json({ data });
       })
       .catch((err) => {
@@ -57,26 +54,23 @@ leadersRouter
   });
 
 leadersRouter
-  .route("/:leaderId")
-
+  .route('/:leaderId')
   .get((req, res, next) => {
     Leaders.findById(req.params.leaderId)
       .then((data) => {
         res.statusCode = 200;
-        res.setHeader("Content-Type", "application/json");
+        res.setHeader('Content-Type', 'application/json');
         res.json({ data });
       })
       .catch((err) => {
         next(err);
       });
   })
-
-  .post((req, res, next) => {
+  .post(authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
-    res.end("POST operation not supported on /leaders/" + req.params.leaderId);
+    res.end('POST operation not supported on /leaders/' + req.params.leaderId);
   })
-
-  .put((req, res, next) => {
+  .put(authenticate.verifyUser, (req, res, next) => {
     Leaders.findByIdAndUpdate(
       req.params.leaderId,
       {
@@ -86,19 +80,18 @@ leadersRouter
     )
       .then((data) => {
         res.statusCode = 200;
-        res.setHeader("Content-Type", "application/json");
+        res.setHeader('Content-Type', 'application/json');
         res.json({ data });
       })
       .catch((err) => {
         next(err);
       });
   })
-
-  .delete((req, res, next) => {
+  .delete(authenticate.verifyUser, (req, res, next) => {
     Leaders.findByIdAndDelete(req.params.leaderId)
       .then((data) => {
         res.statusCode = 200;
-        res.setHeader("Content-Type", "application/json");
+        res.setHeader('Content-Type', 'application/json');
         res.json({ data });
       })
       .catch((err) => {

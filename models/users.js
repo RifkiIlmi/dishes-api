@@ -10,7 +10,7 @@ const userSchema = new Schema({
   },
 });
 
-User.plugin(passportLM);
+userSchema.plugin(passportLM);
 
 const User = mongoose.model("User", userSchema);
 
