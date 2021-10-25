@@ -56,6 +56,7 @@ dishesRouter
   .route('/:dishId')
   .get((req, res, next) => {
     Dishes.findById(req.params.dishId)
+      .populate('comments.author')
       .then((data) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
@@ -122,12 +123,17 @@ dishesRouter
     Dishes.findById(req.params.dishId)
       .then((data) => {
         if (data !== null) {
-          data.comments.push(req.body);
+          const author = req.user._id;
+          data.comments.push({ ...req.body, author });
           data.save().then(
             (dish) => {
-              res.statusCode = 200;
-              res.setHeader('Content-Type', 'application/json');
-              res.json(dish);
+              Dishes.findById(dish._id)
+                .populate('comments.author')
+                .then((dish) => {
+                  res.statusCode = 200;
+                  res.setHeader('Content-Type', 'application/json');
+                  res.json(dish);
+                });
             },
             (err) => next(err)
           );
@@ -178,6 +184,7 @@ dishesRouter
   .route('/:dishId/comments/:commentId')
   .get((req, res, next) => {
     Dishes.findById(req.params.dishId)
+      .populate('comments.author')
       .then(
         (dish) => {
           if (dish != null && dish.comments.id(req.params.commentId) != null) {

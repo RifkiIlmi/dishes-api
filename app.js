@@ -43,15 +43,15 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
-// app.use(
-//   session({
-//     name: 'session_id',
-//     secret: 'mril12secr3t',
-//     saveUninitialized: false,
-//     resave: false,
-//     store: FileStore(),
-//   })
-// );
+app.use(
+  session({
+    name: 'session_id',
+    secret: 'mril12secr3t',
+    saveUninitialized: false,
+    resave: false,
+    store: FileStore(),
+  })
+);
 
 app.use(passport.initialize());
 app.use(passport.session());
