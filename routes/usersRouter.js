@@ -8,9 +8,25 @@ const userRouter = Router();
 userRouter.use(bodyParser.json());
 
 /* GET users listing. */
-userRouter.get('/', (req, res, next) => {
-  res.send('respond with a resource');
-});
+userRouter.get(
+  '/',
+  authenticate.verifyUser,
+  authenticate.verifyAdmin,
+  (req, res, next) => {
+    Users.find({})
+      .then(
+        (data) => {
+          res.statusCode = 200;
+          res.setHeader('Content-Type', 'application/json');
+          res.json({ data });
+        },
+        (err) => next(err)
+      )
+      .catch((err) => {
+        next(err);
+      });
+  }
+);
 
 userRouter.post('/signup', (req, res, next) => {
   Users.register(
