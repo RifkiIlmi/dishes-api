@@ -36,6 +36,7 @@ server.on('listening', onListening);
 var options = {
   key: fs.readFileSync(__dirname + '/private.key'),
   cert: fs.readFileSync(__dirname + '/certificate.pem'),
+  dhparam: fs.readFileSync(__dirname + '/dh-strong.pem'),
 };
 
 var secureServer = https.createServer(options, app);
