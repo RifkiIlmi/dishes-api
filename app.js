@@ -27,6 +27,7 @@ db.once('open', function () {
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/usersRouter');
 const dishesRouter = require('./routes/dishesRouter');
+const favoritesRouter = require('./routes/favoritesRouter');
 const promotionsRouter = require('./routes/promotionsRouter');
 const leadersRouter = require('./routes/leadersRouter');
 const imageUploadRouter = require('./routes/image-uploadRouter');
@@ -71,6 +72,7 @@ app.use(passport.session());
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/dishes', dishesRouter);
+app.use('/favorites', favoritesRouter);
 app.use('/promotions', promotionsRouter);
 app.use('/leaders', leadersRouter);
 app.use('/imageUpload', imageUploadRouter);
